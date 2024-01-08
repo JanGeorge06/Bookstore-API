@@ -16,13 +16,24 @@ def profile(request):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
-def getBooks(request):
-    
-    books = Book.objects.all()
-    serializer = BookSerializer(books,many=True)
-    return Response(serializer.data)
+def Books(request):
+    if request.method == 'POST':
+         body = request.data
+         serializer = BookSerializer(data = body)
+         if serializer.is_valid():
+            serializer.save()  # Save the serialized data to the database
+         return Response({'message':'Book added successfully!'}, status=201)
+    else:
+        if 'price' in request.GET:
+            price = request.GET['price']
+            books = Book.objects.filter(price__lte=price)
+            serializer = BookSerializer(books, many = True)
+            return Response(serializer)
+        books = Book.objects.all()
+        serializer = BookSerializer(books,many=True)
+        return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -31,6 +42,8 @@ def getBook(request,id):
     books = Book.objects.get(id = id)
     serializer = BookSerializer(books)
     return Response(serializer.data)
+   
+
 
 
 
