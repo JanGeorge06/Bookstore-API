@@ -4,5 +4,5 @@ from . import views
 urlpatterns = [
     path('profile',views.profile),
     path('books',views.Books),
-    path('books/<int:id>',views.getBook),
+    path('books/<int:id>',views.RetrieveUpdateBook),
 ]

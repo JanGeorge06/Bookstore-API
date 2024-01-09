@@ -30,21 +30,28 @@ def Books(request):
             price = request.GET['price']
             books = Book.objects.filter(price__lte=price)
             serializer = BookSerializer(books, many = True)
-            return Response(serializer)
+            return Response(serializer.data)
         books = Book.objects.all()
         serializer = BookSerializer(books,many=True)
         return Response(serializer.data)
 
 
-@api_view(['GET'])
+
+@api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
-def getBook(request,id):
-    books = Book.objects.get(id = id)
-    serializer = BookSerializer(books)
-    return Response(serializer.data)
-   
+def RetrieveUpdateBook(request, id):
+    try:
+        book = Book.objects.get(id=id)
+    except Book.DoesNotExist:
+        return Response({'error': 'Book not found'}, status=404)
 
+    if request.method == 'PUT':
+        serializer = BookSerializer(book, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response("Book updated successfully!")
+        return Response(serializer.errors, status=400)
 
-
-
-
+    elif request.method == 'GET':
+        serializer = BookSerializer(book)
+        return Response(serializer.data)
